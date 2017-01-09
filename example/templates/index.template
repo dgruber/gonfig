@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="Sample App which shows Configuration from Config Server">
+    <meta name="author" content="DG">
+
+    <title>CF Inspector</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/css/dashboard.css" rel="stylesheet">
+  </head>
+  <body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-2 col-xs-1">
+        </div>
+        <div class="col-sm-8 col-xs-10 main">
+          <h1 class="page-header"></h1>
+          <h2 class="sub-header">External App Configuration</h2>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              
+              <thead>
+                <tr>
+                  <th>Key</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+
+              <tbody>
+
+                {{ range $key, $value := . }}
+                <tr>
+                  <td>{{ $key }}</td>
+                  <td>{{ $value }}</td>
+                </tr>
+                {{ end }}
+
+              </tbody>
+
+            </table>
+          </div>
+        </div>
+        <div class="col-sm-2 col-xs-1">
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+  </body>
+</html>
