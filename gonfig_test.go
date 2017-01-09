@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-var testVCAPApp string = `
+var testVCAPApp = `
 {"instance_id":"451f045fd16427bb99c895a2649b7b2a",
 "instance_index":0,
 "host":"0.0.0.0",
@@ -31,7 +31,7 @@ var testVCAPApp string = `
 "uris":["styx-james.a1-app.cf-app.com"],"users":null}
 `
 
-var testVCAPwithoutConfig string = `
+var testVCAPwithoutConfig = `
 {
   "elephantsql": [
     {
@@ -66,7 +66,7 @@ var testVCAPwithoutConfig string = `
 }
 `
 
-var testVCAPwithConfig string = `
+var testVCAPwithConfig = `
 {
   "p-config-server": [
    {
@@ -88,7 +88,7 @@ var testVCAPwithConfig string = `
  }
  `
 
-var testConfigServerResponse string = `
+var testConfigServerResponse = `
 {
   "name":"gonfig",
   "profiles":["dgruber-dev"],
@@ -112,15 +112,26 @@ var _ = Describe("Gonfig", func() {
 		os.Setenv("gonfig_testing", "0")
 	})
 
-	Describe("Credentials", func() {
+	Describe("GetConfigServerCredentialsFromEnv()", func() {
 		Context("Correct VCAP set for one config server", func() {
 			It("must parse the credentials correctly", func() {
-				c, err := getConfigServerCredentials()
+				c, err := GetConfigServerCredentialsFromEnv()
 				Expect(err).To(BeNil())
-				Expect(c.URI).To(BeEquivalentTo("https://config-51711835-4626-4823-b5a1-e5d91012f3f2.apps.wise.com/styx-james/jdk/master"))
+				Expect(c.URL.URI).To(BeEquivalentTo("https://config-51711835-4626-4823-b5a1-e5d91012f3f2.apps.wise.com"))
+				Expect(c.URL.App).To(BeEquivalentTo("styx-james"))
+				Expect(c.URL.Label).To(BeEquivalentTo("master"))
+				Expect(c.URL.Profile).To(BeEquivalentTo("jdk"))
 				Expect(c.ClientSecret).To(BeEquivalentTo("9aGx9K5Vx0cM"))
 				Expect(c.ClientID).To(BeEquivalentTo("p-config-server-c4a56a3d-9507-4c2f-9cd1-f858dbf9e11c"))
 				Expect(c.AccessTokenURI).To(BeEquivalentTo("https://p-spring-cloud-services.uaa.cf.wise.com/oauth/token"))
+			})
+		})
+		Context("No config server bound", func() {
+			It("must return an error", func() {
+				os.Setenv("VCAP_SERVICES", testVCAPwithoutConfig)
+				c, err := GetConfigServerCredentialsFromEnv()
+				Expect(err).NotTo(BeNil())
+				Expect(c).To(BeNil())
 			})
 		})
 	})
@@ -142,7 +153,6 @@ var _ = Describe("Gonfig", func() {
 
 	Describe("Fetch Config", func() {
 		It("must return the configured result", func() {
-
 			ts := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				fmt.Fprintln(w, testConfigServerResponse)
 			}))
@@ -159,7 +169,6 @@ var _ = Describe("Gonfig", func() {
 			Expect(err).To(BeNil())
 			Expect(config["resolutionX"].(float64)).To(BeEquivalentTo(640))
 			Expect(config["resolutionY"].(float64)).To(BeEquivalentTo(480))
-
 		})
 	})
 

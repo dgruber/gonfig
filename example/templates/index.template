@@ -8,7 +8,7 @@
     <meta name="description" content="Sample App which shows Configuration from Config Server">
     <meta name="author" content="DG">
 
-    <title>CF Inspector</title>
+    <title>Gonfig</title>
 
     <!-- Bootstrap core CSS -->
     <link href="/css/bootstrap.min.css" rel="stylesheet">

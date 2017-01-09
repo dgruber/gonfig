@@ -62,7 +62,6 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/", IndexHandler)
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
-	//http.Handle("/", r)
 
 	http.ListenAndServe(port, r)
 }
