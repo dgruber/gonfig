@@ -50,16 +50,15 @@ func (c *Credentials) GetConfigurationFromServer() (map[string]interface{}, erro
 	return makeRequest(client, url)
 }
 
-// GetConfigServerCredentialsFromEnv returns oauth2 and other parameters (app name,
-// space name) out of the PCF enviornment variables. They are required for accessing
-// the PCF Configuration Server.
-func GetConfigServerCredentialsFromEnv() (*Credentials, error) {
+// GetServiceCredentialsFromEnv returns oauth2 and other parameters (app name,
+// space name) out of the PCF environment variables using the given label.
+func GetServiceCredentialsFromEnv(service string) (*Credentials, error) {
 	env, err := cfenv.Current()
 	if err != nil {
-		return nil, fmt.Errorf("Error during fetching current configuration: %s", err.Error())
+		return nil, fmt.Errorf("Error during getting CF configuration out of environment: %s", err.Error())
 	}
 
-	services, err := env.Services.WithLabel("p-config-server")
+	services, err := env.Services.WithLabel(service)
 	if err != nil {
 		return nil, err
 	}
@@ -94,6 +93,13 @@ func GetConfigServerCredentialsFromEnv() (*Credentials, error) {
 	}
 
 	return &credentials, nil
+}
+
+// GetConfigServerCredentialsFromEnv returns oauth2 and other parameters (app name,
+// space name) out of the PCF environment variables. They are required for accessing
+// the PCF Configuration Server.
+func GetConfigServerCredentialsFromEnv() (*Credentials, error) {
+	return GetServiceCredentialsFromEnv("p-config-server")
 }
 
 // FetchConfig returns the configuration given by the PCF Config Server which is bound
