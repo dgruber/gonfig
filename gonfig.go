@@ -8,6 +8,8 @@ import (
 	"golang.org/x/oauth2/clientcredentials"
 	"net/http"
 	"os"
+	"reflect"
+	"time"
 )
 
 // URL represents the particles for building the URL to access the configuration
@@ -26,6 +28,9 @@ type Credentials struct {
 	ClientSecret   string
 	URL            URL
 }
+
+// Configuration from config server
+type Config map[string]interface{}
 
 // GetConfigurationFromServer requests the current configuration from the Configuration Server
 // using the given Credentials.
@@ -104,18 +109,53 @@ func GetConfigServerCredentialsFromEnv() (*Credentials, error) {
 
 // FetchConfig returns the configuration given by the PCF Config Server which is bound
 // as service to the app.
-func FetchConfig() (map[string]interface{}, error) {
+func FetchConfig() (Config, error) {
 	return FetchConfigByLabel("master")
 }
 
 // FetchConfigByLabel returns the configuration from the PCF Config Server for a specifc
 // label. The default label is "master" which is used by FetchConfig(). The label represents
 // for a git configuration typically a branch name.
-func FetchConfigByLabel(label string) (map[string]interface{}, error) {
+func FetchConfigByLabel(label string) (Config, error) {
 	credentials, err := GetConfigServerCredentialsFromEnv()
 	if err != nil {
 		return nil, err
 	}
 	credentials.URL.Label = label
 	return credentials.GetConfigurationFromServer()
+}
+
+// ConfigChange checks periodically (checkInterval) if the configuration of the application
+// changed. As soon as there is a difference a new Config object is send into the created
+// Config output channel.
+//
+// Note that it is not guaranteed to have all updates to the config in the output channel.
+// If for example multiple changes of the configuration occur within one checkInterval then
+// only the latest one will be send out.
+func ConfigChange(checkInterval time.Duration) (<-chan Config, error) {
+	return ConfigChangeByLabel(checkInterval, "master")
+}
+
+// ConfigChangeByLabel is the same as ConfigChance with the difference that a label of
+// the configuration can be given (otherwise it would be the master branch configuration).
+func ConfigChangeByLabel(checkInterval time.Duration, label string) (<-chan Config, error) {
+	var lastConfig Config
+
+	ticker := time.NewTicker(checkInterval).C
+	out := make(chan Config)
+
+	go func() {
+		for range ticker {
+			newConfig, err := FetchConfigByLabel(label)
+			if err != nil {
+				break
+			}
+			if reflect.DeepEqual(lastConfig, newConfig) == false {
+				lastConfig = newConfig
+				out <- newConfig
+			}
+		}
+	}()
+
+	return out, nil
 }

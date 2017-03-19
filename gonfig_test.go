@@ -9,26 +9,38 @@ import (
 	"net/http/httptest"
 	"os"
 	"strings"
+	"time"
 )
 
 var testVCAPApp = `
-{"instance_id":"451f045fd16427bb99c895a2649b7b2a",
-"instance_index":0,
-"host":"0.0.0.0",
-"port":61857,
-"started_at":"2013-08-12 00:05:29 +0000",
-"started_at_timestamp":1376265929,
-"start":"2013-08-12 00:05:29 +0000",
-"state_timestamp":1376265929,
-"limits":{"mem":512,"disk":1024,"fds":16384},
-"application_version":"c1063c1c-40b9-434e-a797-db240b587d32",
-"application_name":"styx-james",
-"application_uris":["styx-james.a1-app.cf-app.com"],
-"version":"c1063c1c-40b9-434e-a797-db240b587d32",
-"name":"styx-james",
-"space_id":"3e0c28c5-6d9c-436b-b9ee-1f4326e54d05",
-"space_name":"jdk",
-"uris":["styx-james.a1-app.cf-app.com"],"users":null}
+{
+  "instance_id": "451f045fd16427bb99c895a2649b7b2a",
+  "instance_index": 0,
+  "host": "0.0.0.0",
+  "port": 61857,
+  "started_at": "2013-08-12 00:05:29 +0000",
+  "started_at_timestamp": 1376265929,
+  "start": "2013-08-12 00:05:29 +0000",
+  "state_timestamp": 1376265929,
+  "limits": {
+    "mem": 512,
+    "disk": 1024,
+    "fds": 16384
+  },
+  "application_version": "c1063c1c-40b9-434e-a797-db240b587d32",
+  "application_name": "styx-james",
+  "application_uris": [
+    "styx-james.a1-app.cf-app.com"
+  ],
+  "version": "c1063c1c-40b9-434e-a797-db240b587d32",
+  "name": "styx-james",
+  "space_id": "3e0c28c5-6d9c-436b-b9ee-1f4326e54d05",
+  "space_name": "jdk",
+  "uris": [
+    "styx-james.a1-app.cf-app.com"
+  ],
+  "users": null
+}
 `
 
 var testVCAPwithoutConfig = `
@@ -104,6 +116,22 @@ var testConfigServerResponse = `
 }
 `
 
+var testConfigServerResponse2 = `
+{
+  "name":"gonfig",
+  "profiles":["dgruber-dev"],
+  "label":"master",
+  "version":"77091415ec22c45e8f76407e2b30c226b33271",
+  "state":null,
+  "propertySources":[
+    {
+      "name":"https://github.com/dgruber/sample-config/gonfig.yml",
+      "source":{"resolutionX":320,"resolutionY":240}
+    }
+  ]
+}
+`
+
 var _ = Describe("Gonfig", func() {
 
 	BeforeEach(func() {
@@ -169,6 +197,41 @@ var _ = Describe("Gonfig", func() {
 			Expect(err).To(BeNil())
 			Expect(config["resolutionX"].(float64)).To(BeEquivalentTo(640))
 			Expect(config["resolutionY"].(float64)).To(BeEquivalentTo(480))
+		})
+	})
+
+	Describe("Fetch Config by Channel", func() {
+		Context("When the config changes one time", func() {
+			It("must return the configured result", func() {
+				responseOne := true
+				ts := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					if responseOne == true {
+						fmt.Fprintln(w, testConfigServerResponse)
+					} else {
+						fmt.Fprintln(w, testConfigServerResponse2)
+					}
+				}))
+				defer ts.Close()
+
+				newConfig := strings.Replace(testVCAPwithConfig,
+					"https://config-51711835-4626-4823-b5a1-e5d91012f3f2.apps.wise.com", ts.URL, 1)
+
+				os.Setenv("VCAP_SERVICES", newConfig)
+				os.Setenv("gonfig_testing", "1")
+
+				cfgCh, err := ConfigChange(time.Second * 1)
+				Expect(err).To(BeNil())
+
+				config := <-cfgCh
+				Expect(config["resolutionX"].(float64)).To(BeEquivalentTo(640))
+				Expect(config["resolutionY"].(float64)).To(BeEquivalentTo(480))
+
+				responseOne = false
+
+				config2 := <-cfgCh
+				Expect(config2["resolutionX"].(float64)).To(BeEquivalentTo(320))
+				Expect(config2["resolutionY"].(float64)).To(BeEquivalentTo(240))
+			})
 		})
 	})
 
