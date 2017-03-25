@@ -1,5 +1,5 @@
 # gonfig
-Accessing PCF Config Server from Go Apps
+Accessing the Pivotal Cloud Foundry Config Server from Go apps
 
 Simple library which can be used within Go (#golang) microservice applications in order to get the
 configuration from the PCF Config Server.
