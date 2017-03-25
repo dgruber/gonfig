@@ -1,0 +1,21 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source: {repository: golang, tag: "1.7"}
+
+inputs:
+- name: gonfig 
+
+run:
+  path: sh
+  args:
+  - -exc
+  - |
+    mkdir -p $GOPATH/src/github.com/dgruber
+    cp -r ./gonfig $GOPATH/src/github.com/dgruber/gonfig
+    cd $GOPATH/src/github.com/dgruber/gonfig
+    go version
+    go build -i
+     
