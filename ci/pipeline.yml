@@ -6,13 +6,38 @@ resources:
       uri: https://github.com/dgruber/gonfig.git
       branch: master
 
+  - name: ginkgo
+    type: git
+    source:
+      uri: https://github.com/onsi/ginkgo
+      branch: master
+
+  - name: gomega
+    type: git
+    source:
+      uri: https://github.com/onsi/gomega
+      branch: master
+
 jobs:
   - name: building
     plan:
       - get: gonfig
         trigger: true
       - task: build
-        file: gonfig/ci/build_gonfig.yml
-        on_success:
-          task: test
-          file: gonfig/ci/test_gonfig.yml
+        file: gonfig/ci/tasks/build_gonfig.yml
+
+  - name: testing
+    plan:
+      - get: gonfig
+        passed: [building]
+      - get: ginkgo
+      - get: gomega
+      - task: test
+        file: gonfig/ci/tasks/test_gonfig.yml
+
+  - name: example
+    plan:
+      - get: gonfig
+        passed: [testing]
+      - task: example
+        file: gonfig/ci/tasks/example.yml
