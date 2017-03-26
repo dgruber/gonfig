@@ -6,18 +6,6 @@ resources:
       uri: https://github.com/dgruber/gonfig.git
       branch: master
 
-  - name: ginkgo
-    type: git
-    source:
-      uri: https://github.com/onsi/ginkgo
-      branch: master
-
-  - name: gomega
-    type: git
-    source:
-      uri: https://github.com/onsi/gomega
-      branch: master
-
 jobs:
   - name: building
     plan:

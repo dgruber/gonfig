@@ -17,5 +17,5 @@ run:
     cp -r ./gonfig $GOPATH/src/github.com/dgruber/gonfig
     cd $GOPATH/src/github.com/dgruber/gonfig
     go version
-    ginkgo 
+    go test -v
      
