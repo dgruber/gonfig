@@ -18,8 +18,6 @@ jobs:
     plan:
       - get: gonfig
         passed: [building]
-      - get: ginkgo
-      - get: gomega
       - task: test
         file: gonfig/ci/tasks/test_gonfig.yml
 
