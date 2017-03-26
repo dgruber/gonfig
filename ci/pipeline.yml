@@ -18,6 +18,7 @@ jobs:
     plan:
       - get: gonfig
         passed: [building]
+        trigger: true
       - task: test
         file: gonfig/ci/tasks/test_gonfig.yml
 
@@ -25,5 +26,6 @@ jobs:
     plan:
       - get: gonfig
         passed: [testing]
+        trigger: true
       - task: example
         file: gonfig/ci/tasks/example.yml
