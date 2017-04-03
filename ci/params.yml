@@ -1,0 +1,5 @@
+pcf_api: https://
+pcf_user: user
+pcf_password: password
+pcf_org: org
+pcf_space: space

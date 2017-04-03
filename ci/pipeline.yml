@@ -4,7 +4,17 @@ resources:
     type: git
     source:
       uri: https://github.com/dgruber/gonfig.git
-      branch: master
+      branch: demo
+
+  - name: push
+    type: cf
+    source:
+      api: {{pcf_api}}
+      username: {{pcf_user}}
+      password: {{pcf_password}}  
+      organization: {{pcf_org}}
+      space: {{pcf_space}}  
+      skip_cert_check: true
 
 jobs:
   - name: building
@@ -29,3 +39,9 @@ jobs:
         trigger: true
       - task: example
         file: gonfig/ci/tasks/example.yml
+      - put: push
+        params:
+          manifest: gonfig/example/manifest.yml
+          path: gonfig/example
+          environment_variables:
+            key: value
