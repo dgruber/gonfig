@@ -16,22 +16,18 @@ var config = struct {
 	data map[string]interface{}
 }{data: make(map[string]interface{})}
 
-func updateConfig() {
-	for range time.NewTicker(5 * time.Second).C {
-		conf, err := gonfig.FetchConfig()
+func updateConfig(cfgCh <-chan gonfig.Config) {
+	for cfg := range cfgCh {
 		config.Lock()
-		config.data = conf
+		config.data = cfg
 		config.Unlock()
-		if err != nil {
-			fmt.Println(err.Error())
-		} else {
-			fmt.Println("updated configuration")
-		}
+		fmt.Println("updated configuration")
 	}
 }
 
 func init() {
-	go updateConfig()
+	cfgCh, _ := gonfig.ConfigChange(time.Second * 1)
+	go updateConfig(cfgCh)
 }
 
 func renderIndex(w http.ResponseWriter) error {
