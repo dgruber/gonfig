@@ -11,7 +11,7 @@ credentials.
 
 ## CI Status
 
-Pivotal's Concourse CI/CF tool also provides badges! For an example pipeline compiling and testing the project, see below:
+[Pivotal's Concourse CI/CD tool](https://concourse.ci/) also provides badges! For an example pipeline, which compiles and tests the project, see below:
 
 | Job | Status |
 |---------|--------|
@@ -19,4 +19,4 @@ Pivotal's Concourse CI/CF tool also provides badges! For an example pipeline com
 | Testing | [![Test Badge](http://ci.route.today/api/v1/teams/main/pipelines/gonfig/jobs/testing/badge)](http://ci.route.today/teams/main/pipelines/gonfig/jobs/testing) |
 | Push of Example | [![Push Badge](http://ci.route.today/api/v1/teams/main/pipelines/gonfig/jobs/example/badge)](http://ci.route.today/teams/main/pipelines/gonfig/jobs/example) |
 
-See the [complete pipeline](http://ci.route.today/teams/main/pipelines/gonfig) for more details
+See the [complete pipeline](http://ci.route.today/teams/main/pipelines/gonfig) for more details.
